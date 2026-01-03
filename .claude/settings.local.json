@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run lint)",
+      "Bash(tree:*)",
+      "Bash(ls:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:api.jolpi.ca)",
+      "Bash(cat:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

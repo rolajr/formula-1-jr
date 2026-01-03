@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Variables for fonts */
+:root {
+  --font-heading: 'Rajdhani', 'Inter', sans-serif;
+  --font-body: 'Inter', 'Roboto', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Roboto Mono', monospace;
+}
+
+@layer base {
+  * {
+    @apply border-light-600;
+  }
+
+  body {
+    @apply bg-dark-950 text-light-50 font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus visible styles for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-accent-red-500 ring-offset-2 ring-offset-dark-950 rounded;
+  }
+}
+
+@layer utilities {
+  /* Custom utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-dark {
+    background: linear-gradient(135deg, #0A0A0B 0%, #1C1C21 100%);
+  }
+
+  /* Animations */
+  @keyframes pulse-neon {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(255, 30, 0, 0.4), 0 0 40px rgba(255, 30, 0, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(255, 30, 0, 0.6), 0 0 60px rgba(255, 30, 0, 0.3);
+    }
+  }
+
+  .animate-pulse-neon {
+    animation: pulse-neon 2s ease-in-out infinite;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-dark-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-dark-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-accent-red-500;
+}
