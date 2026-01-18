@@ -11,7 +11,8 @@
       "Bash(curl:*)",
       "WebFetch(domain:api.jolpi.ca)",
       "Bash(cat:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebFetch(domain:www.tvplusgratis2.com)"
     ]
   }
 }

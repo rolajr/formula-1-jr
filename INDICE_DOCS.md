@@ -51,6 +51,19 @@
 - Antes de empezar una nueva tarea
 - Para actualizar al equipo
 
+## 💻 TECNOLOGIAS.md
+**¿Qué es?** Detalle exhaustivo del stack tecnológico
+**¿Para qué sirve?**
+- Ver la lista completa de librerías y frameworks
+- Conocer las versiones exactas de las herramientas
+- Entender la arquitectura técnica (Frontend, Estado, Estilos)
+- Referencia para futuras actualizaciones de paquetes
+
+**Cuándo leerlo:**
+- Al querer profundizar en la arquitectura técnica
+- Para verificar dependencias antes de añadir nuevas
+- Al documentar el stack para terceros
+
 ---
 
 ## 🔌 API_INTEGRATION.md
@@ -129,6 +142,7 @@
 │  📍 Ver plan completo      → ROADMAP.md            │
 │  📍 Hacer diseño/UI        → DESIGN_SPECS.md       │
 │  📍 Saber estado actual    → PROGRESS.md           │
+│  📍 Ver stack técnico      → TECNOLOGIAS.md        │
 │  📍 Trabajar con API       → API_INTEGRATION.md    │
 │  📍 Transferir a otra IA   → GEMINI_PACK.md        │
 │                                                     │

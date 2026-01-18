@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import { Calendar, MapPin, Timer } from 'lucide-react';
 
+interface RaceSession {
+  date: string;
+  time: string;
+}
+
 interface NextRaceHeroProps {
   raceName: string;
   location: string;
@@ -10,6 +15,13 @@ interface NextRaceHeroProps {
   date: string;
   round: number;
   flagEmoji?: string;
+  sessions?: {
+    firstPractice?: RaceSession;
+    secondPractice?: RaceSession;
+    thirdPractice?: RaceSession;
+    qualifying?: RaceSession;
+    sprint?: RaceSession;
+  };
 }
 
 export default function NextRaceHero({
@@ -19,6 +31,7 @@ export default function NextRaceHero({
   date,
   round,
   flagEmoji = '🏁',
+  sessions,
 }: NextRaceHeroProps) {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -26,6 +39,21 @@ export default function NextRaceHero({
     minutes: 0,
     seconds: 0,
   });
+
+  // Función para convertir fecha/hora UTC a hora local
+  const formatLocalDateTime = (dateStr: string, timeStr: string): string => {
+    try {
+      const utcDateTime = new Date(`${dateStr}T${timeStr}`);
+      return new Intl.DateTimeFormat('es-ES', {
+        weekday: 'long',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }).format(utcDateTime);
+    } catch (error) {
+      return 'Hora no disponible';
+    }
+  };
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -126,6 +154,95 @@ export default function NextRaceHero({
               </div>
             </div>
           </div>
+
+          {/* Session Schedule */}
+          {sessions && (
+            <div className="max-w-3xl mx-auto">
+              <div className="bg-dark-900/80 backdrop-blur-sm rounded-xl p-6 border border-dark-700">
+                <h3 className="text-xl font-heading font-bold text-light-50 mb-4 text-center">
+                  Horarios de Sesiones (Tu Hora Local)
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {sessions.firstPractice && (
+                    <div className="flex items-start gap-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                      <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-accent-cyan"></div>
+                      <div>
+                        <p className="text-sm font-semibold text-accent-cyan uppercase tracking-wide">
+                          Práctica 1
+                        </p>
+                        <p className="text-light-200 text-sm mt-1 capitalize">
+                          {formatLocalDateTime(sessions.firstPractice.date, sessions.firstPractice.time)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {sessions.secondPractice && (
+                    <div className="flex items-start gap-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                      <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-accent-cyan"></div>
+                      <div>
+                        <p className="text-sm font-semibold text-accent-cyan uppercase tracking-wide">
+                          Práctica 2
+                        </p>
+                        <p className="text-light-200 text-sm mt-1 capitalize">
+                          {formatLocalDateTime(sessions.secondPractice.date, sessions.secondPractice.time)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {sessions.thirdPractice && (
+                    <div className="flex items-start gap-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                      <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-accent-cyan"></div>
+                      <div>
+                        <p className="text-sm font-semibold text-accent-cyan uppercase tracking-wide">
+                          Práctica 3
+                        </p>
+                        <p className="text-light-200 text-sm mt-1 capitalize">
+                          {formatLocalDateTime(sessions.thirdPractice.date, sessions.thirdPractice.time)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {sessions.sprint && (
+                    <div className="flex items-start gap-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                      <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-accent-gold"></div>
+                      <div>
+                        <p className="text-sm font-semibold text-accent-gold uppercase tracking-wide">
+                          Sprint
+                        </p>
+                        <p className="text-light-200 text-sm mt-1 capitalize">
+                          {formatLocalDateTime(sessions.sprint.date, sessions.sprint.time)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {sessions.qualifying && (
+                    <div className="flex items-start gap-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                      <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-warning"></div>
+                      <div>
+                        <p className="text-sm font-semibold text-warning uppercase tracking-wide">
+                          Clasificación
+                        </p>
+                        <p className="text-light-200 text-sm mt-1 capitalize">
+                          {formatLocalDateTime(sessions.qualifying.date, sessions.qualifying.time)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-start gap-3 p-3 bg-dark-800/50 rounded-lg border border-accent-red-500/50">
+                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-accent-red-500"></div>
+                    <div>
+                      <p className="text-sm font-semibold text-accent-red-500 uppercase tracking-wide">
+                        Carrera
+                      </p>
+                      <p className="text-light-200 text-sm mt-1 capitalize">
+                        {formatLocalDateTime(date.split('T')[0], date.split('T')[1] || '15:00:00Z')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* CTA */}
           <div className="pt-4">

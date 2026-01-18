@@ -3,14 +3,15 @@ import StandingsWidget from '@/components/features/StandingsWidget';
 import NewsGrid from '@/components/features/NewsGrid';
 import NextRaceDetailed from '@/components/home/NextRaceDetailed';
 import UpcomingRacesWidget from '@/components/home/UpcomingRacesWidget';
-import { getNextRace, getDriverStandings } from '@/services/f1Api';
+import { getNextRace, getDriverStandings, getRaceCalendar } from '@/services/f1Api';
 import { mockNews } from '@/data/mocks';
 
 export default async function HomePage() {
   // Fetch real data from API
-  const [nextRace, allStandings] = await Promise.all([
+  const [nextRace, allStandings, raceCalendar] = await Promise.all([
     getNextRace(),
     getDriverStandings(),
+    getRaceCalendar('2025'),
   ]);
 
   // Get top 5 drivers and transform to StandingEntry format
@@ -42,6 +43,7 @@ export default async function HomePage() {
               date={nextRace.date}
               round={nextRace.round}
               flagEmoji={nextRace.flagEmoji}
+              sessions={nextRace.sessions}
             />
           ) : (
             // Opcional: Mostrar un placeholder si no hay próxima carrera
@@ -57,8 +59,8 @@ export default async function HomePage() {
 
         {/* Barra Lateral (25%) */}
         <aside className="lg:col-span-1 space-y-8">
-          <NextRaceDetailed />
-          <UpcomingRacesWidget />
+          <NextRaceDetailed race={nextRace} />
+          <UpcomingRacesWidget races={raceCalendar} />
         </aside>
 
       </div>

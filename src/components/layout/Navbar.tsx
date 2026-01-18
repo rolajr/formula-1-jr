@@ -12,6 +12,7 @@ const navLinks: NavLink[] = [
   { href: '/drivers', label: 'Pilotos' },
   { href: '/teams', label: 'Escuderías' },
   { href: '/schedule', label: 'Horarios' },
+  { href: '/live', label: '🔴 En Vivo' },
 ];
 
 export default function Navbar() {

@@ -1,12 +1,8 @@
-import type {
-  JolpicaResponse,
-  RaceTable,
-  StandingsTable,
-} from '@/types/api';
+import type { JolpicaResponse, RaceTable, StandingsTable } from "@/types/api";
 
 // API Configuration
-const API_BASE_URL = 'https://api.jolpi.ca/ergast/f1';
-const CURRENT_SEASON = '2025'; // Force 2025 season data
+const API_BASE_URL = "https://api.jolpi.ca/ergast/f1";
+const CURRENT_SEASON = "2025"; // Force 2025 season data
 const REQUEST_TIMEOUT = 10000; // 10 seconds
 
 // --- NEW TRANSFORMED TYPES ---
@@ -15,9 +11,9 @@ export interface CurrentDriverStanding {
   points: string;
   wins: string;
   driver: {
-    id: string;      // driverId de la api
-    name: string;    // givenName + familyName
-    code: string;    // ej: VER
+    id: string; // driverId de la api
+    name: string; // givenName + familyName
+    code: string; // ej: VER
     nationality: string;
     flagEmoji: string | null; // Intentar mapear o dejar null
     image: string; // Ruta a la imagen del piloto
@@ -41,6 +37,7 @@ export interface RaceCalendarEvent {
   round: number;
   raceName: string;
   circuitName: string;
+  circuitId: string;
   date: string; // YYYY-MM-DD
   time?: string; // HH:MM:SSZ
   city: string;
@@ -78,19 +75,22 @@ export class F1ApiError extends Error {
     public endpoint?: string
   ) {
     super(message);
-    this.name = 'F1ApiError';
+    this.name = "F1ApiError";
   }
 }
 
 export class F1ValidationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'F1ValidationError';
+    this.name = "F1ValidationError";
   }
 }
 
 // HTTP Client with timeout and error handling
-async function fetchWithTimeout(url: string, timeout = REQUEST_TIMEOUT): Promise<Response> {
+async function fetchWithTimeout(
+  url: string,
+  timeout = REQUEST_TIMEOUT
+): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -98,7 +98,7 @@ async function fetchWithTimeout(url: string, timeout = REQUEST_TIMEOUT): Promise
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'Accept': 'application/json',
+        Accept: "application/json",
       },
       // Next.js caching: revalidate every 1 hour
       next: { revalidate: 3600 },
@@ -108,8 +108,8 @@ async function fetchWithTimeout(url: string, timeout = REQUEST_TIMEOUT): Promise
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new F1ApiError('Request timeout', 408, url);
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new F1ApiError("Request timeout", 408, url);
     }
     throw error;
   }
@@ -138,14 +138,23 @@ async function fetchFromAPI<T>(endpoint: string): Promise<T> {
     }
 
     if (error instanceof Error) {
-      throw new F1ApiError(`Network error: ${error.message}`, undefined, endpoint);
+      throw new F1ApiError(
+        `Network error: ${error.message}`,
+        undefined,
+        endpoint
+      );
     }
 
-    throw new F1ApiError('Unknown error occurred', undefined, endpoint);
+    throw new F1ApiError("Unknown error occurred", undefined, endpoint);
   }
 }
 
 // Transformed data types for application use
+export interface RaceSession {
+  date: string;
+  time: string;
+}
+
 export interface NextRaceInfo {
   name: string;
   location: string;
@@ -155,70 +164,77 @@ export interface NextRaceInfo {
   season: number;
   country: string;
   flagEmoji: string;
+  sessions: {
+    firstPractice?: RaceSession;
+    secondPractice?: RaceSession;
+    thirdPractice?: RaceSession;
+    qualifying?: RaceSession;
+    sprint?: RaceSession;
+  };
 }
 
 // Country to flag emoji mapping (for countries/locations)
 const countryFlags: Record<string, string> = {
-  Australia: '🇦🇺',
-  Bahrain: '🇧🇭',
-  'Saudi Arabia': '🇸🇦',
-  Italy: '🇮🇹',
-  USA: '🇺🇸',
-  Monaco: '🇲🇨',
-  Spain: '🇪🇸',
-  Canada: '🇨🇦',
-  Austria: '🇦🇹',
-  UK: '🇬🇧',
-  Hungary: '🇭🇺',
-  Belgium: '🇧🇪',
-  Netherlands: '🇳🇱',
-  Singapore: '🇸🇬',
-  Japan: '🇯🇵',
-  Qatar: '🇶🇦',
-  Mexico: '🇲🇽',
-  Brazil: '🇧🇷',
-  'United States': '🇺🇸',
-  UAE: '🇦🇪',
-  Azerbaijan: '🇦🇿',
-  France: '🇫🇷',
-  Germany: '🇩🇪',
-  Portugal: '🇵🇹',
-  Russia: '🇷🇺',
-  Turkey: '🇹🇷',
+  Australia: "🇦🇺",
+  Bahrain: "🇧🇭",
+  "Saudi Arabia": "🇸🇦",
+  Italy: "🇮🇹",
+  USA: "🇺🇸",
+  Monaco: "🇲🇨",
+  Spain: "🇪🇸",
+  Canada: "🇨🇦",
+  Austria: "🇦🇹",
+  UK: "🇬🇧",
+  Hungary: "🇭🇺",
+  Belgium: "🇧🇪",
+  Netherlands: "🇳🇱",
+  Singapore: "🇸🇬",
+  Japan: "🇯🇵",
+  Qatar: "🇶🇦",
+  Mexico: "🇲🇽",
+  Brazil: "🇧🇷",
+  "United States": "🇺🇸",
+  UAE: "🇦🇪",
+  Azerbaijan: "🇦🇿",
+  France: "🇫🇷",
+  Germany: "🇩🇪",
+  Portugal: "🇵🇹",
+  Russia: "🇷🇺",
+  Turkey: "🇹🇷",
 };
 
 function getFlagEmojiByCountry(country: string): string {
-  return countryFlags[country] || '🏁';
+  return countryFlags[country] || "🏁";
 }
 
 // Nationality to flag emoji mapping (for drivers)
 const nationalityFlags: Record<string, string> = {
-  Dutch: '🇳🇱',
-  British: '🇬🇧',
-  Mexican: '🇲🇽',
-  Spanish: '🇪🇸',
-  Monegasque: '🇲🇨',
-  Thai: '🇹🇭',
-  German: '🇩🇪',
-  Finnish: '🇫🇮',
-  French: '🇫🇷',
-  Australian: '🇦🇺',
-  Canadian: '🇨🇦',
-  Danish: '🇩🇰',
-  Chinese: '🇨🇳',
-  Japanese: '🇯🇵',
-  American: '🇺🇸',
-  New_Zealander: '🇳🇿',
-  Brazilian: '🇧🇷',
-  Argentine: '🇦🇷',
-  Austrian: '🇦🇹',
-  Belgian: '🇧🇪',
-  Hungarian: '🇭🇺',
-  Italian: '🇮🇹',
-  Russian: '🇷🇺',
-  Turkish: '🇹🇷',
-  Portuguese: '🇵🇹',
-  Azerbaijani: '🇦🇿',
+  Dutch: "🇳🇱",
+  British: "🇬🇧",
+  Mexican: "🇲🇽",
+  Spanish: "🇪🇸",
+  Monegasque: "🇲🇨",
+  Thai: "🇹🇭",
+  German: "🇩🇪",
+  Finnish: "🇫🇮",
+  French: "🇫🇷",
+  Australian: "🇦🇺",
+  Canadian: "🇨🇦",
+  Danish: "🇩🇰",
+  Chinese: "🇨🇳",
+  Japanese: "🇯🇵",
+  American: "🇺🇸",
+  New_Zealander: "🇳🇿",
+  Brazilian: "🇧🇷",
+  Argentine: "🇦🇷",
+  Austrian: "🇦🇹",
+  Belgian: "🇧🇪",
+  Hungarian: "🇭🇺",
+  Italian: "🇮🇹",
+  Russian: "🇷🇺",
+  Turkish: "🇹🇷",
+  Portuguese: "🇵🇹",
+  Azerbaijani: "🇦🇿",
 };
 
 function getFlagEmojiByNationality(nationality: string): string | null {
@@ -236,8 +252,11 @@ export async function getNextRace(): Promise<NextRaceInfo | null> {
     );
 
     // Validate response structure
-    if (!data?.MRData?.RaceTable?.Races || data.MRData.RaceTable.Races.length === 0) {
-      console.warn('No upcoming races found');
+    if (
+      !data?.MRData?.RaceTable?.Races ||
+      data.MRData.RaceTable.Races.length === 0
+    ) {
+      console.warn("No upcoming races found");
       return null;
     }
 
@@ -245,7 +264,7 @@ export async function getNextRace(): Promise<NextRaceInfo | null> {
 
     // Validate required fields
     if (!race.raceName || !race.Circuit || !race.date) {
-      throw new F1ValidationError('Invalid race data: missing required fields');
+      throw new F1ValidationError("Invalid race data: missing required fields");
     }
 
     return {
@@ -257,20 +276,28 @@ export async function getNextRace(): Promise<NextRaceInfo | null> {
       season: parseInt(race.season, 10),
       country: race.Circuit.Location.country,
       flagEmoji: getFlagEmojiByCountry(race.Circuit.Location.country),
+      sessions: {
+        firstPractice: race.FirstPractice,
+        secondPractice: race.SecondPractice,
+        thirdPractice: race.ThirdPractice,
+        qualifying: race.Qualifying,
+        sprint: race.Sprint,
+      },
     };
   } catch (error) {
-    console.error('Error fetching next race:', error);
+    console.error("Error fetching next race:", error);
 
     // Return fallback data instead of crashing
     return {
-      name: 'Season Starting Soon',
-      location: 'TBA',
-      circuit: 'Check back for updates',
+      name: "Season Starting Soon",
+      location: "TBA",
+      circuit: "Check back for updates",
       date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       round: 1,
       season: 2025,
-      country: 'International',
-      flagEmoji: '🏁',
+      country: "International",
+      flagEmoji: "🏁",
+      sessions: {},
     };
   }
 }
@@ -285,23 +312,24 @@ export async function getDriverStandings(): Promise<CurrentDriverStanding[]> {
       `/${CURRENT_SEASON}/driverStandings.json`
     );
 
-    if (
-      !data?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings
-    ) {
-      console.warn('No driver standings found in API response.');
+    if (!data?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings) {
+      console.warn("No driver standings found in API response.");
       return [];
     }
 
-    const standings = data.MRData.StandingsTable.StandingsLists[0].DriverStandings;
+    const standings =
+      data.MRData.StandingsTable.StandingsLists[0].DriverStandings;
 
     return standings.map((s) => {
       if (!s.Driver || !s.Constructors?.[0]) {
-        throw new F1ValidationError('Invalid standing data: missing driver or constructor');
+        throw new F1ValidationError(
+          "Invalid standing data: missing driver or constructor"
+        );
       }
       return {
         position: s.position, // Keep as string
-        points: s.points,     // Keep as string
-        wins: s.wins,         // Keep as string
+        points: s.points, // Keep as string
+        wins: s.wins, // Keep as string
         driver: {
           id: s.Driver.driverId,
           name: `${s.Driver.givenName} ${s.Driver.familyName}`,
@@ -317,7 +345,7 @@ export async function getDriverStandings(): Promise<CurrentDriverStanding[]> {
       };
     });
   } catch (error) {
-    console.error('Error fetching driver standings:', error);
+    console.error("Error fetching driver standings:", error);
     return []; // Return empty array as a fallback
   }
 }
@@ -326,7 +354,9 @@ export async function getDriverStandings(): Promise<CurrentDriverStanding[]> {
  * Get current constructor standings for the whole season
  * @returns Array of constructor standings
  */
-export async function getConstructorStandings(): Promise<CurrentConstructorStanding[]> {
+export async function getConstructorStandings(): Promise<
+  CurrentConstructorStanding[]
+> {
   try {
     const data = await fetchFromAPI<any>(
       `/${CURRENT_SEASON}/constructorStandings.json`
@@ -335,15 +365,18 @@ export async function getConstructorStandings(): Promise<CurrentConstructorStand
     if (
       !data?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings
     ) {
-      console.warn('No constructor standings found in API response.');
+      console.warn("No constructor standings found in API response.");
       return [];
     }
 
-    const standings = data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings;
+    const standings =
+      data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings;
 
     return standings.map((s: any) => {
       if (!s.Constructor) {
-        throw new F1ValidationError('Invalid standing data: missing constructor');
+        throw new F1ValidationError(
+          "Invalid standing data: missing constructor"
+        );
       }
       return {
         position: parseInt(s.position, 10),
@@ -355,7 +388,7 @@ export async function getConstructorStandings(): Promise<CurrentConstructorStand
       };
     });
   } catch (error) {
-    console.error('Error fetching constructor standings:', error);
+    console.error("Error fetching constructor standings:", error);
     return []; // Return empty array as a fallback
   }
 }
@@ -365,7 +398,9 @@ export async function getConstructorStandings(): Promise<CurrentConstructorStand
  * @param season The season year (e.g., '2025'). Defaults to '2025'.
  * @returns Array of race events.
  */
-export async function getRaceCalendar(season: string = '2025'): Promise<RaceCalendarEvent[]> {
+export async function getRaceCalendar(
+  season: string = "2025"
+): Promise<RaceCalendarEvent[]> {
   try {
     const data = await fetchFromAPI<JolpicaResponse<RaceTable>>(
       `/${season}.json`
@@ -377,19 +412,27 @@ export async function getRaceCalendar(season: string = '2025'): Promise<RaceCale
     }
 
     return data.MRData.RaceTable.Races.map((race) => {
-      if (!race.raceName || !race.Circuit || !race.Circuit.Location || !race.date) {
-        throw new F1ValidationError('Invalid race data in calendar: missing required fields');
+      if (
+        !race.raceName ||
+        !race.Circuit ||
+        !race.Circuit.Location ||
+        !race.date
+      ) {
+        throw new F1ValidationError(
+          "Invalid race data in calendar: missing required fields"
+        );
       }
       return {
         round: parseInt(race.round, 10),
         raceName: race.raceName,
         circuitName: race.Circuit.circuitName,
+        circuitId: race.Circuit.circuitId,
         date: race.date,
         time: race.time,
         city: race.Circuit.Location.locality,
         country: race.Circuit.Location.country,
         flagEmoji: getFlagEmojiByCountry(race.Circuit.Location.country),
-        id: race.raceName.toLowerCase().replace(/\s+/g, '-'),
+        id: race.raceName.toLowerCase().replace(/\s+/g, "-"),
       };
     });
   } catch (error) {
@@ -416,7 +459,9 @@ export interface DriverDetails {
  * @param driverId The driver's ID (e.g., 'max_verstappen').
  * @returns DriverDetails object or null if not found/error.
  */
-export async function getDriverDetails(driverId: string): Promise<DriverDetails | null> {
+export async function getDriverDetails(
+  driverId: string
+): Promise<DriverDetails | null> {
   try {
     const data = await fetchFromAPI<JolpicaResponse<any>>(
       `/${CURRENT_SEASON}/drivers/${driverId}.json`
@@ -460,7 +505,9 @@ export interface ConstructorDetails {
  * @param constructorId The constructor's ID (e.g., 'ferrari').
  * @returns ConstructorDetails object or null if not found/error.
  */
-export async function getConstructorDetails(constructorId: string): Promise<ConstructorDetails | null> {
+export async function getConstructorDetails(
+  constructorId: string
+): Promise<ConstructorDetails | null> {
   try {
     const data = await fetchFromAPI<JolpicaResponse<any>>(
       `/${CURRENT_SEASON}/constructors/${constructorId}.json`
@@ -481,11 +528,13 @@ export async function getConstructorDetails(constructorId: string): Promise<Cons
       image: `/imagenes/escuderias/${c.constructorId}.png`,
     };
   } catch (error) {
-    console.error(`Error fetching constructor details for ${constructorId}:`, error);
+    console.error(
+      `Error fetching constructor details for ${constructorId}:`,
+      error
+    );
     return null;
   }
 }
-
 
 /**
  * Health check for API availability
